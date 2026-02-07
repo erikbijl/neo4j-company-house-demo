@@ -209,3 +209,5 @@ __marimo__/
 
 .env
 *.gz
+
+*.DS_Store
