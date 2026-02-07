@@ -50,12 +50,13 @@ At a high level, the graph consists of:
 * **Company, LegalEntity, Individuals, Address and SIC-code** nodes
 * **OWNS, REGISTERED_AT and HAS_SIC** relationships
 
-Running the following query shows the model in thet database: 
+Running the following query shows the model in the database: 
 
 
 ```cypher 
 CALL db.schema.visualization()
 ```
+![Neo4j Graph Schema](images/data_model.png)
 
 This model enables:
 
@@ -79,18 +80,18 @@ Snapshot date used for the backup: **2026-01-08**
 
 ## Loading Data into Neo4j
 
-The repository contains two Jupyter notebooks used to transform and load the data into Neo4j.
+The repository contains two Jupyter notebooks used to transform and load the data into Neo4j. This is done using the [Spark Connector for Neo4j](https://neo4j.com/docs/spark/current/). In the notebooks the following is done: 
 
 ### 1. Company Data
 
 **`company_house_companies.ipynb`**
 
 * Company details
+* Registered Addresses
 * SIC codes
-* Registered addresses
 * Basic normalization and transformation
 
-### 2. Ownership / PSC Data
+### 2. PSC Data
 
 **`company_house_psc.ipynb`**
 
@@ -105,13 +106,15 @@ The repository contains two Jupyter notebooks used to transform and load the dat
 
 Below are example queries used in the demo to explore ownership structures.
 
-### Ownership tree for a single company
+### Subsidiary tree for a single company
 
 ```cypher
 MATCH p=(e:Company {company_number: "05310128"})-[:OWNS*]->(:Company)
 WHERE all(r IN relationships(p) WHERE coalesce(r.ownership_pct_min, 0) >= 0)
 RETURN DISTINCT p
 ```
+
+![Subsidiaries](images/subsidiaries.png)
 
 ---
 
@@ -132,6 +135,20 @@ ORDER BY max_depth DESC
 LIMIT 200
 ```
 
+| company_number | name                                                                                                                         | member_count | max_depth |
+|---------------:|------------------------------------------------------------------------------------------------------------------------------|-------------:|----------:|
+| 02055886       | HG POOLED MANAGEMENT LIMITED                                                                                                  | 102          | 21        |
+| Oc302604       | Tdr Capital Llp                                                                                                               | 413          | 20        |
+| 0100-01-115658 | Park24 Co., Ltd.                                                                                                              | 70           | 19        |
+| 202201590      | Liberty Global Ltd                                                                                                            | 98           | 18        |
+| 6010001115658  | Park24 Co., Ltd.                                                                                                              | 69           | 18        |
+| A 28015865     | Telefonica S A                                                                                                                | 53           | 17        |
+| 13855635       | EM TOPCO LIMITED                                                                                                              | 43           | 16        |
+| 12057312       | MOTION JVCO LIMITED                                                                                                           | 64           | 15        |
+| 14848827       | INTERNATIONAL ENTERTAINMENT JJCO 1 LIMITED                                                                                    | 51           | 15        |
+| 14975492       | SKYLARK UK TOPCO LIMITED                                                                                                      | 38           | 14        |
+
+
 ---
 
 ### Reverse ownership exploration
@@ -141,6 +158,8 @@ MATCH p=(:Company {company_number: "02852924"})-[:OWNS*]-()
 WHERE all(r IN relationships(p) WHERE coalesce(r.ownership_pct_min, 0) >= 0)
 RETURN p
 ```
+
+![Circular Ownership Structure](images/circular_ownership.png)
 
 ---
 
@@ -159,6 +178,9 @@ YIELD path
 RETURN DISTINCT path
 ```
 
+![All reachable companies in Corporate Group](images/corporate_group.png)
+
+
 ---
 
 ### Most connected legal entities
@@ -168,8 +190,22 @@ MATCH (x:LegalEntity)-[]-(c:Company)
 WITH x.name AS name, COUNT(c) AS count
 RETURN name, count
 ORDER BY count DESC
-LIMIT 20
+LIMIT 10
 ```
+
+| name                                                     | count |
+|----------------------------------------------------------|------:|
+| China Investment Corporation                              | 74    |
+| His Majesty The King In Right Of Alberta (Hmka)           | 61    |
+| Qatar Investment Authority                                | 26    |
+| Scottish Enterprise                                      | 24    |
+| Government Of Abu Dhabi                                   | 20    |
+| Qa Directors Limited                                      | 20    |
+| British Columbia Investment Management Corporation        | 19    |
+| Minister For Finance Singapore                            | 19    |
+| Knotel Uk Ltd.                                            | 16    |
+| Ipswich Borough Council                                   | 15    |
+
 
 ---
 
@@ -183,7 +219,7 @@ Used for aggregated insights such as:
 * Number of subsidiaries
 * Highly connected entities
 
-*(Screenshot placeholder)*
+![Company Dashboard](images/dashboard.png)
 
 ---
 
@@ -197,7 +233,7 @@ Used for **interactive exploration** of:
 
 Bloom makes it easy to visually navigate UBO relationships without writing Cypher.
 
-*(Screenshot placeholder)*
+![Bloom](images/bloom.png)
 
 ---
 
