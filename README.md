@@ -69,10 +69,7 @@ This model enables:
 
 The full Neo4j database backup is **too large for GitHub**.
 
-You can download it here:
-👉 **Google Drive link** (add full URL here)
-
-Snapshot date used for the backup: **2026-01-08**
+You can download it here: [Google Drive link](https://drive.google.com/file/d/1ftc1a37PjrDVgJTqE-fTzEcJ97vlMxsh/view?usp=drive_link)
 
 ---
 
