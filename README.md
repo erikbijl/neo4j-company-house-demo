@@ -25,20 +25,15 @@ This is particularly relevant for:
 ---
 
 ## Data Sources
-
 All data comes from **UK Companies House** public datasets. In this register one can find company details, addresses, SIC-codes and ownership relations. You can find the register here: [Search the register
 ](https://find-and-update.company-information.service.gov.uk/)
 
-For this dataset the following datasets were used: 
-* **Company data product**
-  [Free Company Data Product
-](https://download.companieshouse.gov.uk/en_output.html). Snapshot date used: **2026-01-01**
-
-* **People with significant control (PSC) data product**
-  [People with significant control (PSC) snapshot
-](https://download.companieshouse.gov.uk/en_pscdata.html). Snapshot date used: **2026-01-08**
+For this dataset the following datasets were used:
+- **Company data product**: [Free Company Data Product](https://download.companieshouse.gov.uk/en_output.html). Snapshot date used: **2026-01-01**.
+- **People with significant control (PSC) data product**: [People with significant control (PSC) snapshot](https://download.companieshouse.gov.uk/en_pscdata.html). Snapshot date used: **2026-01-08**.
 
 For this demo, the focus is specifically on **ownership and control relationships**. Other PSC attributes are intentionally ignored to keep the model clear and focused.
+
 ---
 
 ## Graph Model Overview
