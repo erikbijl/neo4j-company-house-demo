@@ -1,0 +1,149 @@
+name,description,query,id,parentId,isFolder
+Company Ownership,,,0,,true
+Showing a Company,,"MATCH (c:Company {company_number: ""02723534""})
+RETURN c",1,0,false
+Showing subsidiaries,,"MATCH path=(e:Company{company_number: ""02723534""})-[:OWNS*]->(c:Company|LegalEntity|Individual)
+RETURN DISTINCT path",2,0,false
+Show subsidiaries and Address and SIC,,"MATCH p1=(:SIC|Address)-[]-(e:Company{company_number: ""02723534""})-[:OWNS*]->(c:Company|LegalEntity|Individual)
+MATCH p2=(c)-[]-(:Address)
+MATCH p3=(c)-[]-(:SIC)
+RETURN DISTINCT p1,p2,p3",3,0,false
+Name Search in Database,,"CALL db.index.fulltext.queryNodes(""names"", ""unilever"") YIELD node, score
+WITH node,
+    CASE
+      WHEN node:Individual THEN trim(coalesce(node.forename,'') + ' ' + coalesce(node.surname,''))
+      WHEN node:LegalEntity THEN node.name
+      ELSE trim(coalesce(node.name,'') + ' (' + coalesce(node.company_number,'') + ')')
+    END as name, score
+RETURN name, labels(node) as labels, score",4,0,false
+Name search and group relevancy,,"CALL db.index.fulltext.queryNodes(""names"", ""Lloyds"") YIELD node, score
+WITH node, score LIMIT 20
+CALL (node) {
+  MATCH p=(node)-[:OWNS*]->()
+  RETURN COALESCE(MAX(LENGTH(p)), 0) as depth_down
+}
+
+CALL (node) {
+  MATCH p=(node)<-[:OWNS*]-()
+  RETURN COALESCE(MAX(LENGTH(p)), 0) as depth_up
+}
+WITH node, score, MAX(apoc.coll.max([depth_down, depth_up])) as max_depth
+WITH node,
+    CASE
+      WHEN node:Individual THEN trim(coalesce(node.forename,'') + ' ' + coalesce(node.surname,''))
+      WHEN node:LegalEntity THEN node.name
+      ELSE coalesce(node.name,'')
+    END as name,
+  CASE
+      WHEN node:Individual THEN coalesce(node.person_id,'')
+      WHEN node:LegalEntity THEN node.name
+      ELSE coalesce(node.company_number, '')
+    END as id,
+ score, max_depth
+RETURN name, id, labels(node) as labels, score, max_depth ORDER BY  max_depth*score DESC",5,0,false
+Showing Legal Entity as UBO,,"MATCH p=(e:LegalEntity)-[:OWNS*]->(:Company)
+WHERE e.name CONTAINS ""Government""
+RETURN p LIMIT 1",6,0,false
+Legal Entity with largest number of  members,,"MATCH p=(e:LegalEntity)-[:OWNS*]->(:Company)
+WITH e, p, MAX(LENGTH(p)) as max_depth
+UNWIND nodes(p) as n
+WITH e, COALESCE(SIZE(COLLECT(DISTINCT n)),0) as member_count, COALESCE(MAX(max_depth), 0) as max_depth
+RETURN e.name, member_count, max_depth
+ORDER BY member_count DESC
+//ORDER BY max_depth DESC
+LIMIT 20",7,0,false
+Biggest company ownership structures,,"MATCH (e:Company)-[r:OWNS]->()
+WHERE NOT EXISTS((:Company)-[:OWNS]->(e))
+WITH DISTINCT e
+MATCH p=(e)-[:OWNS*]->(:Company)
+WITH e, p, MAX(LENGTH(p)) as max_depth
+UNWIND nodes(p) as n
+WITH e, COALESCE(SIZE(COLLECT(DISTINCT n)),0) as member_count, COALESCE(MAX(max_depth), 0) as max_depth
+RETURN e.company_number, e.name, member_count, max_depth
+ORDER BY max_depth DESC
+//ORDER BY max_depth DESC
+LIMIT 200",8,0,false
+Circular Ownership,,"MATCH p=(:Company {company_number: ""02852924""})-[:OWNS*]-()
+WHERE all(r IN relationships(p) WHERE coalesce(r.ownership_pct_min,0) >= 0)
+RETURN p",9,0,false
+Find Company Subsidiaries,,"MATCH p=(e:Company{company_number: ""13855635""})-[:OWNS*]->(:Company)
+WHERE all(r IN relationships(p) WHERE coalesce(r.ownership_pct_min,0) >= 0)
+RETURN DISTINCT p",10,0,false
+Find Company Subsidiaries with Levels,,"MATCH p=(c:Company {company_number: ""A 28015865""})-[:OWNS]->{1,}(:Company|LegalEntity|Individual)
+WHERE all(r IN relationships(p) WHERE coalesce(r.ownership_pct_min,0) >= 0)
+WITH p,
+     nodes(p) AS ns,
+     relationships(p) AS rs,
+     [n IN nodes(p) |
+        CASE
+          WHEN n:Individual THEN trim(coalesce(n.forename,'') + ' ' + coalesce(n.surname,''))
+          WHEN n:LegalEntity THEN n.name
+          ELSE trim(coalesce(n.name,'') + ' (' + coalesce(n.company_number,'') + ')')
+        END
+     ] AS displayPath
+RETURN
+  ns[0].company_number AS start_number,
+  displayPath[0]      AS start_name,
+  size(rs)            AS level,
+  reduce(minPct = 1.0, r IN rs | minPct * (toFloat(r.ownership_pct_min)/100.0)) * 100.0
+    AS minimum_ownership_percentage,
+  reduce(maxPct = 1.0, r IN rs | maxPct * (toFloat(r.ownership_pct_max)/100.0)) * 100.0
+    AS maximum_ownership_percentage,
+  displayPath[-1]       AS subsidiary_name,
+  displayPath           AS company_path",11,0,false
+Find Company Owners,,"MATCH path=(e:Company{company_number: ""02015020""})<-[:OWNS*]-(c:Company|LegalEntity|Individual)
+RETURN DISTINCT path",12,0,false
+Find Company Owners with Levels,,"MATCH p=(c:Company {company_number: ""01992209""})<-[:OWNS]-{1,}(:Company|LegalEntity|Individual)
+WHERE all(r IN relationships(p) WHERE coalesce(r.ownership_pct_min,0) >= 75)
+WITH p,
+     nodes(p) AS ns,
+     relationships(p) AS rs,
+     [n IN nodes(p) |
+        CASE
+          WHEN n:Individual THEN trim(coalesce(n.forename,'') + ' ' + coalesce(n.surname,''))
+          WHEN n:LegalEntity THEN n.name
+          ELSE trim(coalesce(n.name,'') + ' (' + coalesce(n.company_number,'') + ')')
+        END
+     ] AS displayPath
+RETURN
+  ns[0].company_number AS start_number,
+  displayPath[0]      AS start_name,
+  size(rs)            AS level,
+  reduce(minPct = 1.0, r IN rs | minPct * (toFloat(r.ownership_pct_min)/100.0)) * 100.0
+    AS minimum_ownership_percentage,
+  reduce(maxPct = 1.0, r IN rs | maxPct * (toFloat(r.ownership_pct_max)/100.0)) * 100.0
+    AS maximum_ownership_percentage,
+  displayPath[-1]       AS owner_name,
+  displayPath           AS company_path",13,0,false
+Find entire Corporate Group,,"MATCH (e:Company{company_number: ""02015020""})
+CALL apoc.path.expandConfig(e, {
+    relationshipFilter: ""OWNS"",
+    minLevel: 1,
+    maxLevel: -1,
+    uniqueness: ""RELATIONSHIP_GLOBAL"",
+    filterStartNode: false
+  })
+YIELD path
+RETURN DISTINCT path",14,0,false
+Find large Corporate Group,,"MATCH (e:Company{company_number: ""00521970""})
+CALL apoc.path.expandConfig(e, {
+    relationshipFilter: ""OWNS"",
+    minLevel: 1,
+    maxLevel: -1,
+    uniqueness: ""RELATIONSHIP_GLOBAL"",
+    filterStartNode: false
+  })
+YIELD path
+RETURN DISTINCT path",15,0,false
+Find Sanctioned Entities,,"MATCH p=(c:LegalEntity|Individual)-[:OWNS*]->(:Company)
+WHERE c.is_sanctioned = True
+RETURN p",16,0,false
+LegalEntities with most companies,,"MATCH (x:LegalEntity)-[]-(c:Company)
+WITH x.name as name, COUNT(c) as count
+RETURN name, count ORDER BY count DESC LIMIT 20",17,0,false
+Individual UBO with deep structures,,"MATCH p=(c:Company)<-[:OWNS*]-(:Company)<-[:OWNS]-(i:Individual)
+RETURN i.person_id, i.forename, i.surname, LENGTH(p) as depth
+ORDER BY depth DESC
+LIMIT 10",18,0,false
+Individual with deep structure,,"MATCH p=(c:Company)<-[:OWNS*]-(:Company)<-[:OWNS]-(i:Individual{person_id: ""a0ab5373e488c452c2c7ac162aed79f97eb9d3fc5aab72cba87cb95a06aacdd8""})
+RETURN p",19,0,false
