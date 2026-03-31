@@ -1,0 +1,495 @@
+{
+  "version": 2,
+  "title": "Company Profile Dashboard",
+  "description": "",
+  "pages": [
+    {
+      "id": "0",
+      "version": 1,
+      "title": "Name Search",
+      "widgets": [
+        {
+          "version": 1,
+          "title": "Search on Name",
+          "w": 3,
+          "h": 1,
+          "x": 0,
+          "y": 0,
+          "meta": {},
+          "settings": {
+            "version": 1,
+            "type": "filter",
+            "databaseName": "neo4j",
+            "entityType": "text",
+            "parameterName": "name",
+            "enableTimeZone": false,
+            "numberType": "Integer"
+          }
+        },
+        {
+          "version": 1,
+          "title": "New card",
+          "w": 12,
+          "h": 10,
+          "x": 0,
+          "y": 1,
+          "meta": {
+            "latestCypherQueries": [
+              {
+                "query": "CALL db.index.fulltext.queryNodes(\"names\", $name) YIELD node, score\nWITH node, score LIMIT 20\nCALL (node) {\n  MATCH p=(node)-[:OWNS*]->()\n  RETURN COALESCE(MAX(LENGTH(p)), 0) as depth_down\n}\n\nCALL (node) {\n  MATCH p=(node)<-[:OWNS*]-()\n  RETURN COALESCE(MAX(LENGTH(p)), 0) as depth_up\n}\nWITH node, score, MAX(apoc.coll.max([depth_down, depth_up])) as max_depth\nWITH node,\n    CASE\n      WHEN node:Individual THEN trim(coalesce(node.forename,'') + ' ' + coalesce(node.surname,''))\n      WHEN node:LegalEntity THEN node.name\n      ELSE coalesce(node.name,'')\n    END as name,\n  CASE\n      WHEN node:Individual THEN coalesce(node.person_id,'')\n      WHEN node:LegalEntity THEN node.name\n      ELSE coalesce(node.company_number, '')\n    END as id,\n score, max_depth\nRETURN name, id, labels(node) as labels, score, max_depth ORDER BY  max_depth*score DESC",
+                "origin": "user"
+              },
+              {
+                "query": "CALL db.index.fulltext.queryNodes(\"names\", $name) YIELD node, score\nWITH node, score LIMIT 20\nCALL (node) {\n  MATCH p=(node)-[:OWNS*]->()\n  RETURN COALESCE(MAX(LENGTH(p)), 0) as depth_down\n}\n\nCALL (node) {\n  MATCH p=(node)<-[:OWNS*]-()\n  RETURN COALESCE(MAX(LENGTH(p)), 0) as depth_up\n}\nWITH node, score, MAX(apoc.coll.max([depth_down, depth_up])) as max_depth\nWITH node,\n    CASE\n      WHEN node:Individual THEN trim(coalesce(node.forename,'') + ' ' + coalesce(node.surname,''))\n      WHEN node:LegalEntity THEN node.name\n      ELSE trim(coalesce(node.name,'') + ' (' + coalesce(node.company_number,'') + ')')\n    END as name,\n  CASE\n      WHEN node:Individual THEN coalesce(node.person_id,'')\n      WHEN node:LegalEntity THEN node.name\n      ELSE coalesce(node.company_number, '')\n    END as id,\n score, max_depth\nRETURN name, id, labels(node) as labels, score, max_depth ORDER BY  max_depth*score DESC",
+                "origin": "user"
+              },
+              {
+                "query": "CALL db.index.fulltext.queryNodes(\"names\", $name) YIELD node, score\nWITH node, score LIMIT 20\nCALL (node) {\n  MATCH p=(node)-[:OWNS*]->()\n  RETURN COALESCE(MAX(LENGTH(p)), 0) as depth_down\n}\n\nCALL (node) {\n  MATCH p=(node)<-[:OWNS*]-()\n  RETURN COALESCE(MAX(LENGTH(p)), 0) as depth_up\n}\nWITH node, score, MAX(apoc.coll.max([depth_down, depth_up])) as max_depth\nWITH node,\n    CASE\n      WHEN node:Individual THEN trim(coalesce(node.forename,'') + ' ' + coalesce(node.surname,''))\n      WHEN node:LegalEntity THEN node.name\n      ELSE trim(coalesce(node.name,'')\n    END as name,\n    CASE\n      WHEN node:Individual THEN coalesce(node.person_id,'')\n      WHEN node:LegalEntity THEN node.name\n      ELSE coalesce(node.company_number,'')\n    END as id,\nscore, max_depth\nRETURN name, id, labels(node) as labels, score, max_depth ORDER BY  max_depth*score DESC",
+                "origin": "user"
+              },
+              {
+                "query": "CALL db.index.fulltext.queryNodes(\"names\", $name) YIELD node, score\nWITH node, score LIMIT 20\nCALL (node) {\n  MATCH p=(node)-[:OWNS*]->()\n  RETURN COALESCE(MAX(LENGTH(p)), 0) as depth_down\n}\n\nCALL (node) {\n  MATCH p=(node)<-[:OWNS*]-()\n  RETURN COALESCE(MAX(LENGTH(p)), 0) as depth_up\n}\nWITH node, score, MAX(apoc.coll.max([depth_down, depth_up])) as max_depth\nWITH node,\n    CASE\n      WHEN node:Individual THEN trim(coalesce(node.forename,'') + ' ' + coalesce(node.surname,''))\n      WHEN node:LegalEntity THEN node.name\n      ELSE trim(coalesce(node.name,'') + ' (' + coalesce(node.company_number,'') + ')')\n    END as name, score, max_depth\nRETURN name, labels(node) as labels, score, max_depth ORDER BY  max_depth*score DESC",
+                "origin": "user"
+              }
+            ]
+          },
+          "settings": {
+            "type": "table",
+            "query": "CALL db.index.fulltext.queryNodes(\"names\", $name) YIELD node, score\nWITH node, score LIMIT 20\nCALL (node) {\n  MATCH p=(node)-[:OWNS*]->()\n  RETURN COALESCE(MAX(LENGTH(p)), 0) as depth_down\n}\n\nCALL (node) {\n  MATCH p=(node)<-[:OWNS*]-()\n  RETURN COALESCE(MAX(LENGTH(p)), 0) as depth_up\n}\nWITH node, score, MAX(apoc.coll.max([depth_down, depth_up])) as max_depth\nWITH node,\n    CASE\n      WHEN node:Individual THEN trim(coalesce(node.forename,'') + ' ' + coalesce(node.surname,''))\n      WHEN node:LegalEntity THEN node.name\n      ELSE coalesce(node.name,'')\n    END as name,\n  CASE\n      WHEN node:Individual THEN coalesce(node.person_id,'')\n      WHEN node:LegalEntity THEN node.name\n      ELSE coalesce(node.company_number, '')\n    END as id,\n score, max_depth\nRETURN name, id, labels(node) as labels, score, max_depth ORDER BY  max_depth*score DESC",
+            "databaseName": "neo4j",
+            "actions": [],
+            "version": 1,
+            "richRenderCells": true,
+            "enableRecordsDownload": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "1",
+      "version": 1,
+      "title": "Company Profile",
+      "widgets": [
+        {
+          "version": 1,
+          "title": "Subsidiaries Levels",
+          "w": 12,
+          "h": 10,
+          "x": 0,
+          "y": 11,
+          "meta": {
+            "latestCypherQueries": [
+              {
+                "query": "MATCH p=(c:Company{company_number: $company_company_number})-[:OWNS]->{1,}(:Company|LegalEntity|Individual)\nRETURN size(relationships(p)) as level, nodes(p)[0].company_number as start_number, nodes(p)[0].name as start_name, reduce(percentage = 1.0, r IN relationships(p) | percentage * (toFloat(r.ownership_pct_min)/100))*100 as minimum_ownership_percentage, reduce(percentage = 1.0, r IN relationships(p) | percentage * (toFloat(r.ownership_pct_max)/100))*100 as maximum_ownership_percentage, nodes(p)[-1].company_number as end_number, nodes(p)[-1].name as end_name, [n in nodes(p) | n.name] as company_path",
+                "origin": "user"
+              },
+              {
+                "query": "MATCH p=(c:Company{company_number: $company_company_number})-[:OWNS]->{1,}(:Company|LegalEntity|Individual)\nRETURN nodes(p)[0].company_number as start_number, nodes(p)[0].name as start_name, size(relationships(p)) as level, reduce(percentage = 1.0, r IN relationships(p) | percentage * (toFloat(r.ownership_pct_min)/100))*100 as minimum_ownership_percentage, reduce(percentage = 1.0, r IN relationships(p) | percentage * (toFloat(r.ownership_pct_max)/100))*100 as maximum_ownership_percentage, nodes(p)[-1].company_number as end_number, nodes(p)[-1].name as end_name, [n in nodes(p) | n.name] as company_path",
+                "origin": "user"
+              },
+              {
+                "query": "MATCH p=(c:Company{company_number: $company_company_number})-[:OWNS]->{1,}(:Company|LegalEntity|Individual)\nRETURN nodes(p)[0].company_number as start_number, nodes(p)[0].name as start_name, size(relationships(p)) as level, reduce(percentage = 1.0, r IN relationships(p) | percentage * (toFloat(r.ownership_pct_min)/100))*100 as minimum_ownership_percentage, reduce(percentage = 1.0, r IN relationships(p) | percentage * (toFloat(r.ownership_pct_max)/100))*100 as maximum_ownership_percentage, nodes(p)[-1].company_number as end_number, nodes(p)[-1].name as end_name, [n in nodes(p) | n.name] as company_names",
+                "origin": "user"
+              },
+              {
+                "query": "MATCH p=(c:Company{company_number: $company_company_number})-[:OWNS]->{1,}(:Company|LegalEntity|Individual)\nRETURN nodes(p)[0].company_number as start_number, nodes(p)[0].name as start_name, size(relationships(p)) as level, reduce(percentage = 1.0, r IN relationships(p) | percentage * (toFloat(r.ownership_pct_min)/100))*100 as minimum_ownership_percentage, reduce(percentage = 1.0, r IN relationships(p) | percentage * (toFloat(r.ownership_pct_max)/100))*100 as maximum_ownership_percentage, nodes(p)[-1].company_number as end_number, nodes(p)[-1].name as end_name,  nodes(p).name as company_names",
+                "origin": "user"
+              },
+              {
+                "query": "MATCH p=(c:Company{company_number: $company_company_number})-[:OWNS]->{1,}(:Company|LegalEntity|Individual)\nRETURN nodes(p)[0].company_number as start_number, nodes(p)[0].name as start_name, size(relationships(p)) as level, reduce(percentage = 1.0, r IN relationships(p) | percentage * (toFloat(r.ownership_pct_min)/100))*100 as minimum_ownership_percentage, reduce(percentage = 1.0, r IN relationships(p) | percentage * (toFloat(r.ownership_pct_max)/100))*100 as maximum_ownership_percentage, nodes(p)[-1].company_number as end_number, nodes(p)[-1].name as end_name",
+                "origin": "user"
+              }
+            ]
+          },
+          "settings": {
+            "type": "table",
+            "query": "MATCH p=(c:Company{company_number: $company_company_number})-[:OWNS]->{1,}(:Company|LegalEntity|Individual)\nRETURN size(relationships(p)) as level, nodes(p)[0].company_number as start_number, nodes(p)[0].name as start_name, reduce(percentage = 1.0, r IN relationships(p) | percentage * (toFloat(r.ownership_pct_min)/100))*100 as minimum_ownership_percentage, reduce(percentage = 1.0, r IN relationships(p) | percentage * (toFloat(r.ownership_pct_max)/100))*100 as maximum_ownership_percentage, nodes(p)[-1].company_number as end_number, nodes(p)[-1].name as end_name, [n in nodes(p) | n.name] as company_path",
+            "databaseName": "neo4j",
+            "actions": [],
+            "version": 1,
+            "richRenderCells": false,
+            "enableRecordsDownload": true
+          }
+        },
+        {
+          "version": 1,
+          "title": "Company Number",
+          "w": 4,
+          "h": 1,
+          "x": 0,
+          "y": 0,
+          "meta": {},
+          "settings": {
+            "version": 1,
+            "type": "filter",
+            "databaseName": "neo4j",
+            "entityType": "text",
+            "parameterName": "company_company_number",
+            "enableTimeZone": false,
+            "numberType": "Integer"
+          }
+        },
+        {
+          "version": 1,
+          "title": "Address",
+          "w": 2,
+          "h": 3,
+          "x": 4,
+          "y": 0,
+          "meta": {
+            "latestCypherQueries": [
+              {
+                "query": "MATCH (c:Company{company_number: $company_company_number})-[:REGISTERED_AT]-(a:Address) RETURN a.address_line_1",
+                "origin": "user"
+              }
+            ]
+          },
+          "settings": {
+            "type": "singleValue",
+            "query": "MATCH (c:Company{company_number: $company_company_number})-[:REGISTERED_AT]-(a:Address) RETURN a.address_line_1",
+            "databaseName": "neo4j",
+            "version": 1,
+            "fontSize": null,
+            "textColor": null,
+            "align": 4
+          }
+        },
+        {
+          "version": 1,
+          "title": "Status",
+          "w": 2,
+          "h": 1,
+          "x": 2,
+          "y": 2,
+          "meta": {
+            "latestCypherQueries": [
+              {
+                "query": "MATCH (c:Company)\nWHERE c.company_number = $company_company_number\nRETURN properties(c)",
+                "origin": "user"
+              },
+              {
+                "query": "MATCH (c:Company)\nWHERE c.company_number = $company_company_number\nRETURN c.name AS name",
+                "origin": "user"
+              }
+            ]
+          },
+          "settings": {
+            "type": "singleValue",
+            "query": "MATCH (c:Company)\nWHERE c.company_number = $company_company_number\nRETURN c.status",
+            "databaseName": "neo4j",
+            "version": 1,
+            "fontSize": null,
+            "textColor": null,
+            "align": 4
+          }
+        },
+        {
+          "version": 1,
+          "title": "Subsidiaries",
+          "w": 6,
+          "h": 4,
+          "x": 6,
+          "y": 3,
+          "meta": {
+            "latestCypherQueries": [
+              {
+                "query": "MATCH p=(c:Company{company_number: $company_company_number})-[:OWNS]->{0,}(:Company|Individual|LegalEntity)\nRETURN p",
+                "origin": "user"
+              },
+              {
+                "query": "MATCH p=(c:Company{company_number: $company_company_number})-[:OWNS]->{0,}(c)\nRETURN p",
+                "origin": "user"
+              },
+              {
+                "query": "MATCH p=(c:Company{company_number: $company_company_number})-[:OWNS]->{0,6}(c)\nRETURN p",
+                "origin": "user"
+              },
+              {
+                "query": "MATCH p=(c:Company{company_number: $company_company_number})-[:OWNS]->{3,6}(c)\nRETURN p",
+                "origin": "user"
+              },
+              {
+                "query": "MATCH p=(c:Company{company_number: $company_company_number})-[:OWNS*]->(:Company)\nRETURN p",
+                "origin": "user"
+              }
+            ]
+          },
+          "settings": {
+            "type": "graph",
+            "query": "MATCH p=(c:Company{company_number: $company_company_number})-[:OWNS]->{0,}(:Company|Individual|LegalEntity)\nRETURN p",
+            "databaseName": "neo4j",
+            "version": 2,
+            "enableSidePanel": true,
+            "enableContextMenu": true,
+            "layout": {
+              "type": "hierarchical",
+              "options": {
+                "direction": "down"
+              }
+            },
+            "enableDownloadImage": true
+          }
+        },
+        {
+          "version": 1,
+          "title": "SIC Code",
+          "w": 2,
+          "h": 1,
+          "x": 6,
+          "y": 2,
+          "meta": {
+            "latestCypherQueries": [
+              {
+                "query": "MATCH (c:Company{company_number: $company_company_number})-[:HAS_SIC]-(s:SIC) RETURN s",
+                "origin": "user"
+              }
+            ]
+          },
+          "settings": {
+            "type": "singleValue",
+            "query": "MATCH (c:Company{company_number: $company_company_number})-[:HAS_SIC]-(s:SIC) RETURN s.sic_code",
+            "databaseName": "neo4j",
+            "version": 1,
+            "fontSize": null,
+            "textColor": null,
+            "align": 4
+          }
+        },
+        {
+          "version": 1,
+          "title": "Number",
+          "w": 2,
+          "h": 1,
+          "x": 0,
+          "y": 2,
+          "meta": {
+            "latestCypherQueries": [
+              {
+                "query": "MATCH (c:Company{company_number: $company_company_number})\nRETURN c.company_number",
+                "origin": "user"
+              }
+            ]
+          },
+          "settings": {
+            "type": "singleValue",
+            "query": "MATCH (c:Company{company_number: $company_company_number})\nRETURN c.company_number",
+            "databaseName": "neo4j",
+            "version": 1,
+            "fontSize": null,
+            "textColor": null,
+            "align": 4
+          }
+        },
+        {
+          "version": 1,
+          "title": "Owners",
+          "w": 6,
+          "h": 4,
+          "x": 0,
+          "y": 3,
+          "meta": {
+            "latestCypherQueries": [
+              {
+                "query": "MATCH p=(c:Company{company_number: $company_company_number})<-[:OWNS]-{0,}(:Company|Individual|LegalEntity)\nRETURN p",
+                "origin": "user"
+              },
+              {
+                "query": "MATCH p=(c:Company{company_number: $company_company_number})<-[:OWNS]-{0,}(:Company)\nRETURN p",
+                "origin": "user"
+              },
+              {
+                "query": "MATCH p=(c:Company{company_number: $company_company_number})<-[:OWNS]-{0,}(c)\nRETURN p",
+                "origin": "user"
+              }
+            ]
+          },
+          "settings": {
+            "type": "graph",
+            "query": "MATCH p=(c:Company{company_number: $company_company_number})<-[:OWNS]-{0,}(:Company|Individual|LegalEntity)\nRETURN p",
+            "databaseName": "neo4j",
+            "version": 2,
+            "enableSidePanel": true,
+            "enableContextMenu": true,
+            "layout": {
+              "type": "hierarchical",
+              "options": {
+                "direction": "down"
+              }
+            },
+            "enableDownloadImage": true
+          }
+        },
+        {
+          "version": 1,
+          "title": "Country",
+          "w": 2,
+          "h": 2,
+          "x": 10,
+          "y": 0,
+          "meta": {},
+          "settings": {
+            "type": "singleValue",
+            "query": "MATCH (c:Company{company_number: $company_company_number})-[:REGISTERED_AT]-(a:Address) RETURN a.country",
+            "databaseName": "neo4j",
+            "version": 1,
+            "fontSize": null,
+            "textColor": null,
+            "align": 4
+          }
+        },
+        {
+          "version": 1,
+          "title": "Address 2",
+          "w": 2,
+          "h": 2,
+          "x": 6,
+          "y": 0,
+          "meta": {
+            "latestCypherQueries": [
+              {
+                "query": "MATCH (c:Company{company_number: $company_company_number})-[:REGISTERED_AT]-(a:Address) RETURN a.post_town, a.country",
+                "origin": "user"
+              }
+            ]
+          },
+          "settings": {
+            "type": "singleValue",
+            "query": "MATCH (c:Company{company_number: $company_company_number})-[:REGISTERED_AT]-(a:Address) RETURN a.address_line_2",
+            "databaseName": "neo4j",
+            "version": 1,
+            "fontSize": null,
+            "textColor": null,
+            "align": 4
+          }
+        },
+        {
+          "version": 1,
+          "title": "SIC Code (Copy)",
+          "w": 4,
+          "h": 1,
+          "x": 8,
+          "y": 2,
+          "meta": {
+            "latestCypherQueries": [
+              {
+                "query": "MATCH (c:Company{company_number: $company_company_number})-[:HAS_SIC]-(s:SIC) RETURN s.description",
+                "origin": "user"
+              },
+              {
+                "query": "MATCH (c:Company{company_number: $company_company_number})-[:HAS_SIC]-(s:SIC) RETURN s",
+                "origin": "user"
+              }
+            ]
+          },
+          "settings": {
+            "type": "singleValue",
+            "query": "MATCH (c:Company{company_number: $company_company_number})-[:HAS_SIC]-(s:SIC) RETURN s.description",
+            "databaseName": "neo4j",
+            "version": 1,
+            "fontSize": null,
+            "textColor": null,
+            "align": 4
+          }
+        },
+        {
+          "version": 1,
+          "title": "City",
+          "w": 2,
+          "h": 2,
+          "x": 8,
+          "y": 0,
+          "meta": {
+            "latestCypherQueries": [
+              {
+                "query": "MATCH (c:Company{company_number: $company_company_number})-[:REGISTERED_AT]-(a:Address) RETURN a.post_town, a.country",
+                "origin": "user"
+              }
+            ]
+          },
+          "settings": {
+            "type": "singleValue",
+            "query": "MATCH (c:Company{company_number: $company_company_number})-[:REGISTERED_AT]-(a:Address) RETURN a.post_town",
+            "databaseName": "neo4j",
+            "version": 1,
+            "fontSize": null,
+            "textColor": null,
+            "align": 4
+          }
+        },
+        {
+          "version": 1,
+          "title": "Name",
+          "w": 4,
+          "h": 1,
+          "x": 0,
+          "y": 1,
+          "meta": {
+            "latestCypherQueries": [
+              {
+                "query": "MATCH (c:Company) WHERE c.company_number = $company_company_number RETURN  c.name as name",
+                "origin": "user"
+              },
+              {
+                "query": "MATCH (c:Company) WHERE c.company_number = $company_company_number RETURN c.company_number as company_number, c.name as name, c.country_of_origin as country_of_origin, c.category as category, c.incorporation_date as incorporation_date, c.status as status",
+                "origin": "user"
+              },
+              {
+                "query": "MATCH (c:Company) WHERE c.company_number = $company_company_number RETURN c.company_number, c.name, c.country_of_origin, c.category, c.incorporation_date, c.status",
+                "origin": "user"
+              }
+            ]
+          },
+          "settings": {
+            "type": "singleValue",
+            "query": "MATCH (c:Company)\nWHERE c.company_number = $company_company_number\nRETURN c.name AS name",
+            "databaseName": "neo4j",
+            "version": 1,
+            "fontSize": null,
+            "textColor": null,
+            "align": 4
+          }
+        },
+        {
+          "version": 1,
+          "title": "Owner Levels",
+          "w": 12,
+          "h": 4,
+          "x": 0,
+          "y": 7,
+          "meta": {
+            "latestCypherQueries": [
+              {
+                "query": "MATCH p=(c:Company{company_number: $company_company_number})<-[:OWNS]-{1,}(:Company|LegalEntity|Individual)\nRETURN size(relationships(p)) as level, nodes(p)[0].company_number as start_number, nodes(p)[0].name as start_name, reduce(percentage = 1.0, r IN relationships(p) | percentage * (toFloat(r.ownership_pct_min)/100))*100 as minimum_ownership_percentage, reduce(percentage = 1.0, r IN relationships(p) | percentage * (toFloat(r.ownership_pct_max)/100))*100 as maximum_ownership_percentage, nodes(p)[-1].company_number as end_number, nodes(p)[-1].name as end_name, [n in nodes(p) | n.name] as company_path",
+                "origin": "user"
+              },
+              {
+                "query": "MATCH p=(c:Company{company_number: $company_company_number})<-[:OWNS]-{1,}(:Company|LegalEntity|Individual)\nRETURN nodes(p)[0].company_number as start_number, nodes(p)[0].name as start_name, size(relationships(p)) as level, reduce(percentage = 1.0, r IN relationships(p) | percentage * (toFloat(r.ownership_pct_min)/100))*100 as minimum_ownership_percentage, reduce(percentage = 1.0, r IN relationships(p) | percentage * (toFloat(r.ownership_pct_max)/100))*100 as maximum_ownership_percentage, nodes(p)[-1].company_number as end_number, nodes(p)[-1].name as end_name, [n in nodes(p) | n.name] as company_path",
+                "origin": "user"
+              }
+            ]
+          },
+          "settings": {
+            "type": "table",
+            "query": "MATCH p=(c:Company{company_number: $company_company_number})<-[:OWNS]-{1,}(:Company|LegalEntity|Individual)\nRETURN size(relationships(p)) as level, nodes(p)[0].company_number as start_number, nodes(p)[0].name as start_name, reduce(percentage = 1.0, r IN relationships(p) | percentage * (toFloat(r.ownership_pct_min)/100))*100 as minimum_ownership_percentage, reduce(percentage = 1.0, r IN relationships(p) | percentage * (toFloat(r.ownership_pct_max)/100))*100 as maximum_ownership_percentage, nodes(p)[-1].company_number as end_number, nodes(p)[-1].name as end_name, [n in nodes(p) | n.name] as company_path",
+            "databaseName": "neo4j",
+            "actions": [],
+            "version": 1,
+            "richRenderCells": false,
+            "enableRecordsDownload": true
+          }
+        }
+      ]
+    }
+  ],
+  "params": [
+    {
+      "version": 1,
+      "key": "name",
+      "initialValue": "Unilever"
+    },
+    {
+      "version": 1,
+      "key": "company_company_number"
+    }
+  ]
+}
